@@ -9,32 +9,22 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'master', url: ''
+                git branch: 'master', url: 'https://github.com/khushboo-289/python-flask-app.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    dockerImage = docker.build("${DOCKER_IMAGE}")
+                    dockerImage = docker.build(DOCKER_IMAGE)
                 }
             }
         }
 
-        stage('Login to Docker Hub') {
+        stage('Login and Push to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_HUB_CREDENTIALS}") {
-                        echo "Logged in to Docker Hub"
-                    }
-                }
-            }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_HUB_CREDENTIALS}") {
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_HUB_CREDENTIALS) {
                         dockerImage.push('latest')
                     }
                 }
@@ -44,10 +34,11 @@ pipeline {
 
     post {
         success {
-            echo "Docker image built and pushed successfully!"
+            echo "✅ Docker image built and pushed successfully!"
         }
         failure {
-            echo "Pipeline failed."
+            echo "❌ Pipeline failed."
         }
     }
 }
+
